@@ -27,7 +27,8 @@ jobs:
      - name: install package from commit
        run: |
         pip install --quiet git+${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git@${GITHUB_SHA}
-     - name: deploy_vms
+     - name: Deploy steady stable benchmark VMs
+       id: deploy
        run: |
         redisbench-admin deploy \
          --inventory_git https://github.com/RedisLabsModules/testing-infrastructure/tree/master/terraform/oss-standalone-redis-small \
@@ -37,16 +38,16 @@ jobs:
         CLIENT_PRIVATE_IP=$(cat /tmp/deploy-env.json | jq '.CLIENT_PRIVATE_IP')
         SERVER_PUBLIC_IP=$(cat /tmp/deploy-env.json | jq '.SERVER_PUBLIC_IP')
         SERVER_PRIVATE_IP=$(cat /tmp/deploy-env.json | jq '.SERVER_PRIVATE_IP')
-        echo "::set-output name=CLIENT_PUBLIC_IP::${CLIENT_PUBLIC_IP}"
-        echo "::set-output name=CLIENT_PRIVATE_IP::${CLIENT_PRIVATE_IP}"
-        echo "::set-output name=SERVER_PUBLIC_IP::${SERVER_PUBLIC_IP}"
-        echo "::set-output name=SERVER_PRIVATE_IP::${SERVER_PRIVATE_IP}"
+        echo "::set-output name=CLIENT_PUBLIC_IP::$CLIENT_PUBLIC_IP"
+        echo "::set-output name=CLIENT_PRIVATE_IP::$CLIENT_PRIVATE_IP"
+        echo "::set-output name=SERVER_PUBLIC_IP::$SERVER_PUBLIC_IP"
+        echo "::set-output name=SERVER_PRIVATE_IP::$SERVER_PRIVATE_IP"
      - name: Client logic
        run: |
-            echo "CLIENT_PUBLIC_IP: ${{steps.deploy_vms.outputs.CLIENT_PUBLIC_IP}}"
-            echo "CLIENT_PRIVATE_IP: ${{steps.deploy_vms.outputs.CLIENT_PRIVATE_IP}}"
-            echo "SERVER_PUBLIC_IP: ${{steps.deploy_vms.outputs.SERVER_PUBLIC_IP}}"
-            echo "SERVER_PRIVATE_IP: ${{steps.deploy_vms.outputs.SERVER_PRIVATE_IP}}"
+            echo "CLIENT_PUBLIC_IP: ${{steps.deploy.outputs.CLIENT_PUBLIC_IP}}"
+            echo "CLIENT_PRIVATE_IP: ${{steps.deploy.outputs.CLIENT_PRIVATE_IP}}"
+            echo "SERVER_PUBLIC_IP: ${{steps.deploy.outputs.SERVER_PUBLIC_IP}}"
+            echo "SERVER_PRIVATE_IP: ${{steps.deploy.outputs.SERVER_PRIVATE_IP}}"
      - name: destroy_vms
        run: |
         redisbench-admin deploy \
