@@ -42,12 +42,27 @@ jobs:
         echo "::set-output name=CLIENT_PRIVATE_IP::$CLIENT_PRIVATE_IP"
         echo "::set-output name=SERVER_PUBLIC_IP::$SERVER_PUBLIC_IP"
         echo "::set-output name=SERVER_PRIVATE_IP::$SERVER_PRIVATE_IP"
+
      - name: Client logic
        run: |
             echo "CLIENT_PUBLIC_IP: ${{steps.deploy.outputs.CLIENT_PUBLIC_IP}}"
             echo "CLIENT_PRIVATE_IP: ${{steps.deploy.outputs.CLIENT_PRIVATE_IP}}"
             echo "SERVER_PUBLIC_IP: ${{steps.deploy.outputs.SERVER_PUBLIC_IP}}"
             echo "SERVER_PRIVATE_IP: ${{steps.deploy.outputs.SERVER_PRIVATE_IP}}"
+
+     - name: Install redis on remote DB VM
+       uses: appleboy/ssh-action@master
+       with:
+         host: ${{steps.deploy.outputs.SERVER_PUBLIC_IP}}
+         username: "ubuntu"
+         key: ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM }}
+         port: ${{ secrets.PERFORMANCE_SSH_PORT }}
+         script: |
+          curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
+          sudo apt-get update
+          sudo apt-get install redis
+     
      - name: destroy_vms
        run: |
         redisbench-admin deploy \
