@@ -51,7 +51,7 @@ jobs:
             echo "SERVER_PRIVATE_IP: ${{steps.deploy.outputs.SERVER_PRIVATE_IP}}"
 
      - name: Configure SSH
-        run: |
+       run: |
           mkdir -p ~/.ssh/
           echo "$SSH_KEY" > ~/.ssh/perf.key
           chmod 600 ~/.ssh/perf.key
@@ -74,7 +74,7 @@ jobs:
           SERVER_PUBLIC_IP: ${{steps.deploy.outputs.SERVER_PUBLIC_IP}}
 
      - name: Install redis on remote DB VM
-        run: |
+       run: |
           ssh db 'curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg'
           ssh db 'echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list'
           ssh db 'sudo apt-get update'
