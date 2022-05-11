@@ -91,6 +91,7 @@ jobs:
        run: |
           ssh client 'sudo apt-get update'
           ssh client 'sudo apt-get install python3-pip -y'
+          ssh client 'sudo python3 -m pip install --upgrade pip'
           scp -r `pwd` client:$REMOTE_PATH
           ssh client "pip3 install $REMOTE_PATH"
           ssh client "pip3 install -r $REMOTE_PATH/benchmarks/benchmark_requirements.txt"
