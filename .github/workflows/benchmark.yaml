@@ -77,7 +77,7 @@ jobs:
           ssh db 'curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg'
           ssh db 'echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list'
           ssh db 'sudo apt-get update'
-          ssh db 'sudo apt-get install redis'
+          ssh db 'sudo apt-get install redis -y'
 
      - name: destroy_vms
        run: |
