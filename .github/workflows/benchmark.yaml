@@ -2,11 +2,11 @@ name: Benchmarks
 
 on:
   pull_request:
-    types: [ labeled ]
+    types: [synchronize, opened, reopened, labeled]
 
 jobs:
   benchmark:
-    if: ${{ github.event.label.name == 'action:run-benchmark' }}
+    if: ${{ contains(github.event.*.labels.*.name, 'action:run-benchmark') }}
     runs-on: ubuntu-latest
     steps:
      - uses: actions/checkout@v2
