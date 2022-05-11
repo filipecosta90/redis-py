@@ -50,26 +50,36 @@ jobs:
             echo "SERVER_PUBLIC_IP: ${{steps.deploy.outputs.SERVER_PUBLIC_IP}}"
             echo "SERVER_PRIVATE_IP: ${{steps.deploy.outputs.SERVER_PRIVATE_IP}}"
 
-     - name: Prepare PEM
-       run: |
-         chmod 400 ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM_NAME }}
-         ssh -i ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM_NAME }} -p ${{ secrets.PERFORMANCE_SSH_PORT }} \
-            -o "StrictHostKeyChecking no" \
-            ubuntu@${{steps.deploy.outputs.SERVER_PUBLIC_IP}} whoami
+     - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/perf.key
+          chmod 600 ~/.ssh/perf.key
+          cat >>~/.ssh/config <<END
+          Host db
+            HostName $SERVER_PUBLIC_IP
+            User $SSH_USER
+            IdentityFile ~/.ssh/perf.key
+            StrictHostKeyChecking no
+          Host client
+            HostName $CLIENT_PUBLIC_IP
+            User $SSH_USER
+            IdentityFile ~/.ssh/perf.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: "ubuntu"
+          SSH_KEY: ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM }}
+          CLIENT_PUBLIC_IP: ${{steps.deploy.outputs.CLIENT_PUBLIC_IP}}
+          SERVER_PUBLIC_IP: ${{steps.deploy.outputs.SERVER_PUBLIC_IP}}
 
      - name: Install redis on remote DB VM
-       uses: appleboy/ssh-action@master
-       with:
-         host: ${{steps.deploy.outputs.SERVER_PUBLIC_IP}}
-         username: "ubuntu"
-         key: ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM_NAME }}
-         port: ${{ secrets.PERFORMANCE_SSH_PORT }}
-         script: |
-          curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
-          echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
-          sudo apt-get update
-          sudo apt-get install redis
-     
+        run: |
+          ssh db 'curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg'
+          ssh db 'echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list'
+          ssh db 'sudo apt-get update'
+          ssh db 'sudo apt-get install redis'
+
      - name: destroy_vms
        run: |
         redisbench-admin deploy \
