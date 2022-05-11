@@ -50,12 +50,17 @@ jobs:
             echo "SERVER_PUBLIC_IP: ${{steps.deploy.outputs.SERVER_PUBLIC_IP}}"
             echo "SERVER_PRIVATE_IP: ${{steps.deploy.outputs.SERVER_PRIVATE_IP}}"
 
+     - name: Prepare PEM
+       run: |
+         echo $EC2_PRIVATE_PEM > ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM_NAME }}
+         chmod 400 ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM_NAME }}
+
      - name: Install redis on remote DB VM
        uses: appleboy/ssh-action@master
        with:
          host: ${{steps.deploy.outputs.SERVER_PUBLIC_IP}}
          username: "ubuntu"
-         key: ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM }}
+         key: ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM_NAME }}
          port: ${{ secrets.PERFORMANCE_SSH_PORT }}
          script: |
           curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
