@@ -5,7 +5,10 @@ on:
     types: [synchronize, opened, reopened, labeled]
 
 env:
-  EC2_PRIVATE_PEM: ${{ secrets.EC2_PRIVATE_PEM }}
+  EC2_PRIVATE_PEM: ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.PERFORMANCE_EC2_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.PERFORMANCE_EC2_SECRET_KEY }}
+  AWS_DEFAULT_REGION: ${{ secrets.PERFORMANCE_EC2_REGION }}
 
 jobs:
   benchmark:
