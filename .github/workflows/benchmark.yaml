@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [synchronize, opened, reopened, labeled]
 
+env:
+  EC2_PRIVATE_PEM: ${{ secrets.EC2_PRIVATE_PEM }}
+
 jobs:
   benchmark:
     if: ${{ contains(github.event.*.labels.*.name, 'action:run-benchmark') }}
