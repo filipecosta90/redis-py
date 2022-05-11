@@ -54,6 +54,9 @@ jobs:
        run: |
          echo $EC2_PRIVATE_PEM > ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM_NAME }}
          chmod 400 ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM_NAME }}
+         ssh -i ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM_NAME }} -p ${{ secrets.PERFORMANCE_SSH_PORT }} \
+            -o "StrictHostKeyChecking no" \
+            ubuntu@${{steps.deploy.outputs.SERVER_PUBLIC_IP}} whoami
 
      - name: Install redis on remote DB VM
        uses: appleboy/ssh-action@master
