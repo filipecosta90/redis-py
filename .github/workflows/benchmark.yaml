@@ -27,9 +27,24 @@ jobs:
      - name: install package from commit
        run: |
         pip install --quiet git+${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git@${GITHUB_SHA}
-     - name: deploy stable benchmark VMs
+     - name: deploy_vms
        run: |
         redisbench-admin deploy \
          --inventory_git https://github.com/RedisLabsModules/testing-infrastructure/tree/master/terraform/oss-standalone-redis-small \
          --set_env_vars_json "deploy-env.json" \
          --inventory_local_dir /tmp/env
+        content=`cat /tmp/env/deploy-env.json`
+        echo "::set-output name=deployJSON::$content"
+     - name: Client logic
+       run: |
+            echo "${{fromJson(steps.deploy_vms.outputs.deployJSON).CLIENT_PUBLIC_IP}}"
+            echo "${{fromJson(steps.deploy_vms.outputs.deployJSON).CLIENT_PRIVATE_IP}}"
+            echo "${{fromJson(steps.deploy_vms.outputs.deployJSON).SERVER_PUBLIC_IP}}"
+            echo "${{fromJson(steps.deploy_vms.outputs.deployJSON).SERVER_PRIVATE_IP}}"
+     - name: destroy_vms
+       run: |
+        redisbench-admin deploy \
+         --inventory_git https://github.com/RedisLabsModules/testing-infrastructure/tree/master/terraform/oss-standalone-redis-small \
+         --set_env_vars_json "deploy-env.json" \
+         --inventory_local_dir /tmp/env \
+         --destroy
