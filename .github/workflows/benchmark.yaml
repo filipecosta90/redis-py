@@ -81,8 +81,8 @@ jobs:
           ssh db 'sudo apt-get update'
           ssh db 'sudo apt-get install redis -y'
           ssh db 'redis-cli config set protected-mode no'
-          echo '$REDIS_PASS'
-          ssh db 'redis-cli config set requirepass $REDIS_PASS'
+          echo "$REDIS_PASS"
+          ssh db "redis-cli config set requirepass $REDIS_PASS"
 
      - name: destroy_vms
        run: |
