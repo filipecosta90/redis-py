@@ -33,14 +33,20 @@ jobs:
          --inventory_git https://github.com/RedisLabsModules/testing-infrastructure/tree/master/terraform/oss-standalone-redis-small \
          --set_env_vars_json "/tmp/deploy-env.json" \
          --inventory_local_dir /tmp/inventory
-        JSON_CONTENT=`cat /tmp/deploy-env.json`
-        echo "::set-output name=deployJSON::$JSON_CONTENT"
+        CLIENT_PUBLIC_IP=$(/tmp/deploy-env.json | jq '.CLIENT_PUBLIC_IP')
+        CLIENT_PRIVATE_IP=$(/tmp/deploy-env.json | jq '.CLIENT_PRIVATE_IP')
+        SERVER_PUBLIC_IP=$(/tmp/deploy-env.json | jq '.SERVER_PUBLIC_IP')
+        SERVER_PRIVATE_IP=$(/tmp/deploy-env.json | jq '.SERVER_PRIVATE_IP')
+        echo "::set-output name=CLIENT_PUBLIC_IP::${CLIENT_PUBLIC_IP}"
+        echo "::set-output name=CLIENT_PRIVATE_IP::${CLIENT_PRIVATE_IP}"
+        echo "::set-output name=SERVER_PUBLIC_IP::${SERVER_PUBLIC_IP}"
+        echo "::set-output name=SERVER_PRIVATE_IP::${SERVER_PRIVATE_IP}"
      - name: Client logic
        run: |
-            echo "${{fromJson(steps.deploy_vms.outputs.deployJSON).CLIENT_PUBLIC_IP}}"
-            echo "${{fromJson(steps.deploy_vms.outputs.deployJSON).CLIENT_PRIVATE_IP}}"
-            echo "${{fromJson(steps.deploy_vms.outputs.deployJSON).SERVER_PUBLIC_IP}}"
-            echo "${{fromJson(steps.deploy_vms.outputs.deployJSON).SERVER_PRIVATE_IP}}"
+            echo "CLIENT_PUBLIC_IP: ${{steps.deploy_vms.outputs.CLIENT_PUBLIC_IP}}"
+            echo "CLIENT_PRIVATE_IP: ${{steps.deploy_vms.outputs.CLIENT_PRIVATE_IP}}"
+            echo "SERVER_PUBLIC_IP: ${{steps.deploy_vms.outputs.SERVER_PUBLIC_IP}}"
+            echo "SERVER_PRIVATE_IP: ${{steps.deploy_vms.outputs.SERVER_PRIVATE_IP}}"
      - name: destroy_vms
        run: |
         redisbench-admin deploy \
