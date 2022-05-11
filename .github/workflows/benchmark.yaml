@@ -4,16 +4,15 @@ on:
   pull_request:
     types: [synchronize, opened, reopened, labeled]
 
-env:
-  EC2_PRIVATE_PEM: ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.PERFORMANCE_EC2_ACCESS_KEY }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.PERFORMANCE_EC2_SECRET_KEY }}
-  AWS_DEFAULT_REGION: ${{ secrets.PERFORMANCE_EC2_REGION }}
-
 jobs:
   benchmark:
     if: ${{ contains(github.event.*.labels.*.name, 'action:run-benchmark') }}
     runs-on: ubuntu-latest
+    env:
+      EC2_PRIVATE_PEM: ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.PERFORMANCE_EC2_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.PERFORMANCE_EC2_SECRET_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.PERFORMANCE_EC2_REGION }}
     steps:
      - uses: actions/checkout@v2
      - name: install python
@@ -51,6 +50,11 @@ jobs:
             echo "SERVER_PRIVATE_IP: ${{steps.deploy.outputs.SERVER_PRIVATE_IP}}"
 
      - name: Configure SSH
+       env:
+         SSH_USER: "ubuntu"
+         SSH_KEY_NAME: ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM_NAME }}
+         CLIENT_PUBLIC_IP: ${{steps.deploy.outputs.CLIENT_PUBLIC_IP}}
+         SERVER_PUBLIC_IP: ${{steps.deploy.outputs.SERVER_PUBLIC_IP}}
        run: |
           mkdir -p ~/.ssh/
           chmod 600 $SSH_KEY_NAME
@@ -66,18 +70,18 @@ jobs:
             IdentityFile $SSH_KEY_NAME
             StrictHostKeyChecking no
           END
-       env:
-          SSH_USER: "ubuntu"
-          SSH_KEY_NAME: ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM_NAME }}
-          CLIENT_PUBLIC_IP: ${{steps.deploy.outputs.CLIENT_PUBLIC_IP}}
-          SERVER_PUBLIC_IP: ${{steps.deploy.outputs.SERVER_PUBLIC_IP}}
+       
 
      - name: Install redis on remote DB VM
+       env:
+         REDIS_PASS: ${{ secrets.PERFORMANCE_EC2_DB_PASSWORD }}
        run: |
           ssh db 'curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg'
           ssh db 'echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list'
           ssh db 'sudo apt-get update'
           ssh db 'sudo apt-get install redis -y'
+          ssh db 'redis-cli config set protected-mode no'
+          ssh db 'redis-cli config set requirepass ${REDIS_PASS}'
 
      - name: destroy_vms
        run: |
