@@ -31,10 +31,10 @@ jobs:
        run: |
         redisbench-admin deploy \
          --inventory_git https://github.com/RedisLabsModules/testing-infrastructure/tree/master/terraform/oss-standalone-redis-small \
-         --set_env_vars_json "deploy-env.json" \
-         --inventory_local_dir /tmp/env
-        content=`cat /tmp/env/deploy-env.json`
-        echo "::set-output name=deployJSON::$content"
+         --set_env_vars_json "/tmp/deploy-env.json" \
+         --inventory_local_dir /tmp/inventory
+        JSON_CONTENT=`cat /tmp/deploy-env.json`
+        echo "::set-output name=deployJSON::$JSON_CONTENT"
      - name: Client logic
        run: |
             echo "${{fromJson(steps.deploy_vms.outputs.deployJSON).CLIENT_PUBLIC_IP}}"
@@ -46,5 +46,5 @@ jobs:
         redisbench-admin deploy \
          --inventory_git https://github.com/RedisLabsModules/testing-infrastructure/tree/master/terraform/oss-standalone-redis-small \
          --set_env_vars_json "deploy-env.json" \
-         --inventory_local_dir /tmp/env \
+         --inventory_local_dir /tmp/inventory \
          --destroy
