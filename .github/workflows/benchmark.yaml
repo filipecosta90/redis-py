@@ -92,9 +92,9 @@ jobs:
           ssh client 'sudo apt-get update'
           ssh client 'sudo apt-get install python3-pip -y'
           ssh client 'mkdir -p /home/ubuntu/redis-py/'
-          ssh client "pip install --quiet git+${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git@${GITHUB_SHA}"
+          ssh client "pip3 install --quiet git+${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git@${GITHUB_SHA}"
           scp -r `pwd` client:$REMOTE_PATH
-          ssh client "pip install -r $REMOTE_PATH/benchmarks/benchmark_requirements.txt"
+          ssh client "pip3 install -r $REMOTE_PATH/benchmarks/benchmark_requirements.txt"
           ssh client "PASS=$REDIS_PASS HOST=$SERVER_PRIVATE_IP PORT=6379 python3 $REMOTE_PATH/benchmarks/benchmark_connection.py --output $REMOTE_PATH/output.json --inherit-environ PORT,HOST,PASS"
           sftp client:$REMOTE_PATH/output.json
 
