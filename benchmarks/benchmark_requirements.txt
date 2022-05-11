@@ -1,1 +1,2 @@
 redisbench-admin>=0.8.10
+pyperf>=2.3.1
