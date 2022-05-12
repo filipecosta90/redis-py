@@ -74,14 +74,18 @@ jobs:
        
 
      - name: Install redis on remote DB VM
-       env:
-         REDIS_PASS: ${{ secrets.PERFORMANCE_EC2_DB_PASSWORD }}
        run: |
           ssh db 'curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg'
           ssh db 'echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list'
           ssh db 'sudo apt-get update'
           ssh db 'sudo apt-get install redis -y'
-          # for more advanced config requirements alter /etc/redis/redis.conf
+
+     - name: Configure Redis
+       env:
+         REDIS_PASS: ${{ secrets.PERFORMANCE_EC2_DB_PASSWORD }}
+         REMOTE_PATH: /home/ubuntu/redis-py/
+         SERVER_PRIVATE_IP: ${{steps.deploy.outputs.SERVER_PRIVATE_IP}}
+       run: |
           ssh db 'redis-cli config set protected-mode no'
           ssh db "redis-cli config set requirepass $REDIS_PASS"
           ssh db "redis-cli config set bind $SERVER_PRIVATE_IP"
