@@ -55,6 +55,7 @@ jobs:
          SSH_KEY_NAME: ${{ secrets.PERFORMANCE_EC2_PRIVATE_PEM_NAME }}
          CLIENT_PUBLIC_IP: ${{steps.deploy.outputs.CLIENT_PUBLIC_IP}}
          SERVER_PUBLIC_IP: ${{steps.deploy.outputs.SERVER_PUBLIC_IP}}
+         SERVER_PRIVATE_IP: ${{steps.deploy.outputs.SERVER_PRIVATE_IP}}
        run: |
           mkdir -p ~/.ssh/
           chmod 600 $SSH_KEY_NAME
@@ -80,8 +81,10 @@ jobs:
           ssh db 'echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list'
           ssh db 'sudo apt-get update'
           ssh db 'sudo apt-get install redis -y'
+          # for more advanced config requirements alter /etc/redis/redis.conf
           ssh db 'redis-cli config set protected-mode no'
           ssh db "redis-cli config set requirepass $REDIS_PASS"
+          ssh db "redis-cli config set bind $SERVER_PRIVATE_IP"
 
      - name: Copy project content to remote CLIENT VM
        env:
