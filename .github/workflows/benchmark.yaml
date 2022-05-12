@@ -30,7 +30,7 @@ jobs:
        id: deploy
        run: |
         redisbench-admin deploy \
-         --inventory_git https://github.com/RedisLabsModules/testing-infrastructure/tree/master/terraform/oss-standalone-redis-small \
+         --inventory_git https://github.com/RedisLabsModules/testing-infrastructure/tree/master/terraform/oss-standalone-amd64-ubuntu20.04-m6i.4xlarge \
          --set_env_vars_json "/tmp/deploy-env.json" \
          --inventory_local_dir /tmp/inventory
         CLIENT_PUBLIC_IP=$(cat /tmp/deploy-env.json | jq '.CLIENT_PUBLIC_IP')
@@ -115,7 +115,7 @@ jobs:
      - name: destroy_vms
        run: |
         redisbench-admin deploy \
-         --inventory_git https://github.com/RedisLabsModules/testing-infrastructure/tree/master/terraform/oss-standalone-redis-small \
+         --inventory_git https://github.com/RedisLabsModules/testing-infrastructure/tree/master/terraform/oss-standalone-amd64-ubuntu20.04-m6i.4xlarge \
          --set_env_vars_json "deploy-env.json" \
          --inventory_local_dir /tmp/inventory \
          --destroy
