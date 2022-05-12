@@ -86,7 +86,7 @@ jobs:
           ssh db "redis-cli config set requirepass $REDIS_PASS"
           ssh db "redis-cli config set bind $SERVER_PRIVATE_IP"
 
-     - name: Copy project content to remote CLIENT VM
+     - name: Copy project content to remote CLIENT VM and setup benchmark
        env:
          REDIS_PASS: ${{ secrets.PERFORMANCE_EC2_DB_PASSWORD }}
          REMOTE_PATH: /home/ubuntu/redis-py/
@@ -98,6 +98,13 @@ jobs:
           scp -r `pwd` client:$REMOTE_PATH
           ssh client "pip3 install $REMOTE_PATH"
           ssh client "pip3 install -r $REMOTE_PATH/benchmarks/benchmark_requirements.txt"
+
+     - name: Run micro-benchmarks
+       env:
+         REDIS_PASS: ${{ secrets.PERFORMANCE_EC2_DB_PASSWORD }}
+         REMOTE_PATH: /home/ubuntu/redis-py/
+         SERVER_PRIVATE_IP: ${{steps.deploy.outputs.SERVER_PRIVATE_IP}}
+       run: |
           ssh client "PASS=$REDIS_PASS HOST=$SERVER_PRIVATE_IP PORT=6379 python3 $REMOTE_PATH/benchmarks/benchmark_connection.py --output $REMOTE_PATH/output.json --inherit-environ PORT,HOST,PASS"
           sftp client:$REMOTE_PATH/output.json
 
