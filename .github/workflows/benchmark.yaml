@@ -87,8 +87,8 @@ jobs:
          SERVER_PRIVATE_IP: ${{steps.deploy.outputs.SERVER_PRIVATE_IP}}
        run: |
           ssh db 'redis-cli config set protected-mode no'
-          ssh db "redis-cli config set requirepass $REDIS_PASS"
           ssh db "redis-cli config set bind $SERVER_PRIVATE_IP"
+          ssh db "redis-cli config set requirepass $REDIS_PASS"
 
      - name: Copy project content to remote CLIENT VM and setup benchmark
        env:
