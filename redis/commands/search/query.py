@@ -222,8 +222,6 @@ class Query:
             args += ["LANGUAGE", self._language]
         if self._expander:
             args += ["EXPANDER", self._expander]
-        if self._dialect:
-            args += ["DIALECT", self._dialect]
 
         return args
 

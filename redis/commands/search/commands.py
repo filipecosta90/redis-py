@@ -477,6 +477,8 @@ class SearchCommands:
 
         args += query.get_args()
         args += self.get_params_args(query_params)
+        if query._dialect:
+            args += ["DIALECT", query._dialect]
 
         return args, query
 
