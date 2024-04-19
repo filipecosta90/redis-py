@@ -168,10 +168,10 @@ class VectorField(Field):
         if sort or noindex:
             raise DataError("Cannot set 'sortable' or 'no_index' in Vector fields.")
 
-        if algorithm.upper() not in ["FLAT", "HNSW"]:
+        if algorithm.upper() not in ["FLAT", "HNSW", "RAFT_IVF_PQ", "RAFT_IVF_FLAT"]:
             raise DataError(
-                "Realtime vector indexing supporting 2 Indexing Methods:"
-                "'FLAT' and 'HNSW'."
+                "Realtime vector indexing supporting 4 Indexing Methods:"
+                "'FLAT', 'HNSW', 'RAFT_IVF_PQ', and 'RAFT_IVF_FLAT'."
             )
 
         attr_li = []
